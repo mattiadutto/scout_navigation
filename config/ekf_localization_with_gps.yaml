@@ -1,0 +1,118 @@
+### ekf global config file ###
+namespace/ekf_global_filter_node:
+    ros__parameters:
+        # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin computation until it receives at least one message from one of the inputs. It will then run continuously at the frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
+        frequency: 30.0
+        
+        # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar environment and want to ignore the effect of small variations in the ground plane that might otherwise be detected by, for example, an IMU. Defaults to false if unspecified.
+        two_d_mode: true
+
+        # Whether to publish the acceleration state. Defaults to false if unspecified.
+        publish_acceleration: false
+
+        # Whether to broadcast the transformation over the /tf topic. Defaults to true if unspecified.
+        publish_tf: true
+        
+        # 1. Set the map_frame, odom_frame, and base_link frames to the appropriate frame names for your system.
+        #     1a. If your system does not have a map_frame, just remove it, and make sure "world_frame" is set to the value of odom_frame.
+        # 2. If you are fusing continuous position data such as wheel encoder odometry, visual odometry, or IMU data, set "world_frame" to your odom_frame value. This is the default behavior for robot_localization's state estimation nodes.
+        # 3. If you are fusing global absolute position data that is subject to discrete jumps (e.g., GPS or position updates from landmark observations) then:
+        #     3a. Set your "world_frame" to your map_frame value
+        #     3b. MAKE SURE something else is generating the odom->base_link transform. Note that this can even be another state estimation node from robot_localization! However, that instance should *not* fuse the global data.
+        map_frame: map              # Defaults to "map" if unspecified
+        odom_frame: odom            # Defaults to "odom" if unspecified
+        base_link_frame: base_link  # Defaults to "base_link" if unspecified
+        world_frame: map            # Defaults to the value of odom_frame if unspecified
+        
+        odom0: odom
+        odom0_config: [true,  true,  true,
+                       false, false, false,
+                       false, false, false,
+                       false, false, true,
+                       false, false, false]
+
+        odom1: odometry/gps
+        odom1_config: [true,  true,  false,
+                       false, false, false,
+                       false, false, false,
+                       false, false, false,
+                       false, false, false]
+        odom1_differential: false
+
+        imu0: imu
+        imu0_config: [false, false, false,
+                      true,  true,  true,
+                      false, false, false,
+                      false, false, false,
+                      false, false, false]
+
+        # Starts the filter with the specified state. The state is given as a 15-D vector of doubles, in the same order as the sensor configurations. 
+        initial_state: [0.0, 0.0, 0.0,
+                        0.0, 0.0, 3.14,
+                        0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0]
+
+### ekf local config file ###
+namespace/ekf_local_filter_node:
+    ros__parameters:
+        # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin computation until it receives at least one message from one of the inputs. It will then run continuously at the frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
+        frequency: 30.0
+        
+        # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar environment and want to ignore the effect of small variations in the ground plane that might otherwise be detected by, for example, an IMU. Defaults to false if unspecified.
+        two_d_mode: true
+
+        # Whether to publish the acceleration state. Defaults to false if unspecified.
+        publish_acceleration: false
+
+        # Whether to broadcast the transformation over the /tf topic. Defaults to true if unspecified.
+        publish_tf: true
+        
+        # If you're having trouble, try setting this to true, and then echo the /diagnostics_agg topic to see if the node 
+        # is unhappy with any settings or data.
+        print_diagnostics: true
+        
+        # 1. Set the map_frame, odom_frame, and base_link frames to the appropriate frame names for your system.
+        #     1a. If your system does not have a map_frame, just remove it, and make sure "world_frame" is set to the value of odom_frame.
+        # 2. If you are fusing continuous position data such as wheel encoder odometry, visual odometry, or IMU data, set "world_frame" to your odom_frame value. This is the default behavior for robot_localization's state estimation nodes.
+        # 3. If you are fusing global absolute position data that is subject to discrete jumps (e.g., GPS or position updates from landmark observations) then:
+        #     3a. Set your "world_frame" to your map_frame value
+        #     3b. MAKE SURE something else is generating the odom->base_link transform. Note that this can even be another state estimation node from robot_localization! However, that instance should *not* fuse the global data.
+        map_frame: map              # Defaults to "map" if unspecified
+        odom_frame: odom            # Defaults to "odom" if unspecified
+        base_link_frame: base_link  # Defaults to "base_link" if unspecified
+        world_frame: odom           # Defaults to the value of odom_frame if unspecified
+        
+        odom0: odom
+        odom0_config: [true,  true,  true,
+                       false, false, false,
+                       false, false, false,
+                       false, false, true,
+                       false, false, false]
+
+        imu0: imu
+        imu0_config: [false, false, false,
+                      true,  true,  true,
+                      false, false, false,
+                      false, false, false,
+                      false, false, false]
+        imu0_remove_gravitational_acceleration: true
+
+### navsat transform node config file ###
+namespace/navsat_transform_node:
+    ros__parameters:
+        # The real-valued frequency, in Hz, at which navsat_transform_node checks for new sensor_msgs/NavSatFix messages, and publishes filtered sensor_msgs/NavSatFix when publish_filtered_gps is set to true.
+        frequency: 10.0
+
+        # Enter the magnetic declination for your location. If you don’t know it, see http://www.ngdc.noaa.gov/geomag-web (make sure to convert the value to radians). This parameter is needed if your IMU provides its orientation with respect to the magnetic north.
+        magnetic_declination_radians: 0.0625
+
+        # Your IMU should read 0 for yaw when facing east. If it doesn’t, enter the offset here (desired_value = offset + sensor_raw_value). For example, if your IMU reports 0 when facing north, as most of them do, this parameter would be pi/2 (~1.5707963). This parameter changed in version 2.2.1. Previously, navsat_transform_node assumed that IMUs read 0 when facing north, so yaw_offset was used acordingly.
+        yaw_offset: 0.0
+
+        # If true, navsat_transform_node will wait to get a datum from either: the datum parameter or the set_datum service
+        wait_for_datum: true
+
+        # The time, in seconds, to wait before calculating the transform from GPS coordinates to your robot’s world frame.
+        delay: 10.0
+        
