@@ -117,24 +117,11 @@ def generate_launch_description():
         ],
     )
 
-    nav2_map_server_node = Node(
+    nav2_bt_node = Node(
         namespace=namespace,
-        package="nav2_map_server",
-        executable="map_server",
-        name="map_server",
-        output="screen",
-        respawn=False,
-        respawn_delay=2.0,
-        parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
-        arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf")],
-    )
-
-    nav2_amcl_node = Node(
-        namespace="/scout_mini",
-        package="nav2_amcl",
-        executable="amcl",
-        name="amcl",
+        package="nav2_bt_navigator",
+        executable="bt_navigator",
+        name="bt_navigator",
         output="screen",
         respawn=False,
         respawn_delay=2.0,
@@ -173,30 +160,30 @@ def generate_launch_description():
         ],
     )
 
-    nav2_waypoint_follower_node = Node(
+    nav2_map_server_node = Node(
         namespace=namespace,
-        package="nav2_waypoint_follower",
-        executable="waypoint_follower",
-        name="waypoint_follower",
+        package="nav2_map_server",
+        executable="map_server",
+        name="map_server",
+        output="screen",
+        respawn=False,
+        respawn_delay=2.0,
+        parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
+        arguments=["--ros-args", "--log-level", "info"],
+        remappings=[("/tf", "tf")],
+    )
+
+    nav2_amcl_node = Node(
+        namespace="/scout_mini",
+        package="nav2_amcl",
+        executable="amcl",
+        name="amcl",
         output="screen",
         respawn=False,
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
         remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
-    )
-
-    nav2_bt_node = Node(
-        namespace=namespace,
-        package="nav2_bt_navigator",
-        executable="bt_navigator",
-        name="bt_navigator",
-        output="screen",
-        respawn=False,
-        respawn_delay=2.0,
-        parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
-        arguments=["--ros-args", "--log-level", "info"],
-        remappings=[],
     )
 
     nav2_behavior_server = Node(
@@ -209,6 +196,38 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+    )
+
+    nav2_velocity_smoother_node = Node(
+        namespace=namespace,
+        package="nav2_velocity_smoother",
+        executable="velocity_smoother",
+        name="velocity_smoother",
+        output="screen",
+        respawn=False,
+        respawn_delay=2.0,
+        parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
+        arguments=["--ros-args", "--log-level", "info"],
+        remappings=[
+            ("/tf", "tf"),
+            ("/tf_static", "tf_static"),
+            ("cmd_vel", "cmd_vel_nav"),
+            ("cmd_vel_smoothed", "cmd_vel"),
+        ],
+    )
+
+    nav2_waypoint_follower_node = Node(
+        namespace=namespace,
+        package="nav2_waypoint_follower",
+        executable="waypoint_follower",
+        name="waypoint_follower",
+        output="screen",
+        respawn=False,
+        respawn_delay=2.0,
+        parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
+        arguments=["--ros-args", "--log-level", "info"],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
 
     nav2_lifecycle_manager_node = Node(
@@ -230,8 +249,9 @@ def generate_launch_description():
                     "controller_server",
                     "planner_server",
                     "amcl",
-                    "waypoint_follower",
                     "behavior_server",
+                    "velocity_smoother",
+                    "waypoint_follower",
                     "bt_navigator",
                 ]
             },
@@ -254,6 +274,7 @@ def generate_launch_description():
     ld.add_action(nav2_behavior_server)
     ld.add_action(nav2_amcl_node)
     ld.add_action(nav2_waypoint_follower_node)
+    ld.add_action(nav2_velocity_smoother_node)
     ld.add_action(nav2_bt_node)
     ld.add_action(nav2_lifecycle_manager_node)
 
