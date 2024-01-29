@@ -2,7 +2,7 @@ This package is a package for ROS2 Humble with the target of implementing Naviga
 Currently the navigation stack in a base configuration is working. 
 
 ### TODO @ 26 / 01:
-- [ ] Set the correct parameter for all the "services" (amcl, costmaps ecc..) of Nav2
+- [x] Set the correct parameter for all the "services" (amcl, costmaps ecc..) of Nav2
 - [ ] Create a BT that is able to switch between indoor and outdoor navigation
 - [ ] Implement the "Dead man's switch" using twist_mux: joypad and nav2
 - [ ] Add controller
@@ -12,6 +12,7 @@ Currently the navigation stack in a base configuration is working.
 Small staff:
 - [ ] Fix use_sim_time as default to true -> after edit the launch command
 - [ ] Add the teleop_joy command.
+- [ ] Update the use guide
 
 ## How to use the stack
 If you don't have set up the Scout Mini per simulation you will need to download also this repositories.

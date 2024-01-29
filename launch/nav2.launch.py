@@ -247,7 +247,7 @@ def generate_launch_description():
     # Add the commands to the launch description
     ld.add_action(robot_localization_local_node)
     ld.add_action(robot_localization_global_node)
-    # ld.add_action(navsat_transform_node)
+    # ld.add_action(navsat_transform_node) #TODO: questa linea e' commentata per evitare di attivare tutte le volte il servizio GPS.
     ld.add_action(nav2_map_server_node)
     ld.add_action(nav2_controller_node)
     ld.add_action(nav2_planner_node)

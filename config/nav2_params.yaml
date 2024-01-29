@@ -11,8 +11,11 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      footprint: "[ [0.245, 0.315], [0.245, -0.315], [-0.245, 0.315], [-0.245, -0.315] ]" # da impostare correttamente
-      plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
+      footprint: "[ [0.290, 0.3075], [0.290, -0.3075], [-0.290, 0.3075], [-0.290, -0.3075] ]" # set on the size of the Scout Mini 615x580mm
+      plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -47,12 +50,12 @@ local_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
         inflation_radius: 0.1
-      static_layer:
-        map_subscribe_transient_local: True
       always_send_full_costmap: True
+    
   local_costmap_client:
     ros__parameters:
       use_sim_time: True
+  
   local_costmap_rclcpp_node:
     ros__parameters:
       use_sim_time: True
@@ -65,7 +68,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: True
-      robot_radius: 0.4
+      footprint: "[ [0.290, 0.3075], [0.290, -0.3075], [-0.290, 0.3075], [-0.290, -0.3075] ]" # set on the size of the Scout Mini 615x580mm
       resolution: 0.05
       track_unknown_space: True
       plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
@@ -111,9 +114,11 @@ global_costmap:
         cost_scaling_factor: 3.0
         inflation_radius: 0.1
       always_send_full_costmap: True
+
   global_costmap_client:
     ros__parameters:
       use_sim_time: True
+
   global_costmap_rclcpp_node:
     ros__parameters:
       use_sim_time: True
@@ -123,9 +128,9 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.5
       use_astar: false
       allow_unknown: true
+      tolerance: 0.5
 
 controller_server:
   ros__parameters:
@@ -135,9 +140,9 @@ controller_server:
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
     failure_tolerance: 0.3
-    odom_topic: "/scout_mini/odom"
+    odom_topic: /namespace/odom
     progress_checker_plugins: ["progress_checker"] # progress_checker_plugin: "progress_checker" For Humble and older
-    goal_checker_plugin: "goal_checker"
+    goal_checker_plugin: ["goal_checker"]
     controller_plugins: ["FollowPath"]
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
@@ -150,18 +155,18 @@ controller_server:
       stateful: True
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
-      # I don't have any idea of what is set of parameters are doing.
       debug_trajectory_details: True
       min_vel_x: 0.0
       min_vel_y: 0.0
-      max_vel_x: 0.26
+      max_vel_x: 2.77
       max_vel_y: 0.0
       max_vel_theta: 1.0
       min_speed_xy: 0.0
-      max_speed_xy: 0.26
+      max_speed_xy: 2.77 # this is set for Scout Mini (max speed 10km/h)
       min_speed_theta: 0.0
       # Add high threshold velocity for turtlebot 3 issue.
       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
+      # TODO: I don't know what to set for this 6 parameters, which is the maximum accelaratin for the robot?
       acc_lim_x: 2.5
       acc_lim_y: 0.0
       acc_lim_theta: 3.2
@@ -191,16 +196,11 @@ controller_server:
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
 
-controller_server_rclcpp_node:
-  ros__parameters:
-    use_sim_time: False
-
-
 bt_navigator:
   ros__parameters:
     global_frame: map
     robot_base_frame: base_link
-    odom_topic: /scout_mini/odom
+    odom_topic: /namespace/odom
     bt_loop_duration: 10
     default_server_timeout: 20
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
@@ -256,14 +256,6 @@ bt_navigator:
       - nav2_drive_on_heading_cancel_bt_node
       - nav2_is_battery_charging_condition_bt_node
 
-# bt_navigator_navigate_through_poses_rclcpp_node:
-#   ros__parameters:
-#     use_sim_time: True
-
-# bt_navigator_navigate_to_pose_rclcpp_node:
-#   ros__parameters:
-#     use_sim_time: True
-
 bt_navigator_rclcpp_node:
   ros__parameters:
     use_sim_time: True
@@ -283,8 +275,8 @@ amcl:
     global_frame_id: "map"
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
-    laser_max_range: 100.0
-    laser_min_range: -1.0
+    laser_max_range: 25.0 # 25 meters for indoor is the max for RPlidar A3, put -1 as default value and it will take the max value available
+    laser_min_range: 0.2 # 0.2 meters is the min for RPlidar A3, -1 as default value and it will take the min value available
     laser_model_type: "likelihood_field"
     max_beams: 60
     max_particles: 2000
@@ -303,12 +295,12 @@ amcl:
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.5
-    z_max: 0.05
+    z_max: 0.05 # not used in likelihood mode
     z_rand: 0.5
-    z_short: 0.05
+    z_short: 0.05 # not used in likelihood mode
     scan_topic: /namespace/scan
-    map_topic: /scout_mini/map
-    set_initial_pose: true
+    map_topic: /namespace/map
+    set_initial_pose: true # this should be set to false in real world scenario. 
     always_reset_initial_pose: false
     first_map_only: false
     initial_pose:
@@ -321,23 +313,13 @@ map_server:
   ros__parameters:
     use_sim_time: True
     yaml_filename: "workshop.yaml"
-    # topic_name: "map"
-    # frame_id: "map"
-
-# map_server:
-#   ros__parameters:
-#     use_sim_time: True
-#     save_map_timeout: 5.0
-#     free_thresh_default: 0.25
-#     occupied_thresh_default: 0.65
-#     map_subscribe_transient_local: True
 
 behavior_server:
   ros__parameters:
-    local_costmap_topic: local_costmap/costmap_raw
-    local_footprint_topic: local_costmap/published_footprint
-    global_costmap_topic: global_costmap/costmap_raw
-    global_footprint_topic: global_costmap/published_footprint
+    local_costmap_topic: /namespace/local_costmap/costmap_raw
+    local_footprint_topic: /namespace/local_costmap/published_footprint
+    global_costmap_topic: /namespace/global_costmap/costmap_raw
+    global_footprint_topic: /namespace/global_costmap/published_footprint
     cycle_frequency: 10.0
     behavior_plugins: ["spin", "backup", "drive_on_heading", "wait", "assisted_teleop"]
     spin:
@@ -359,19 +341,15 @@ behavior_server:
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
 
-robot_state_publisher:
-  ros__parameters:
-    use_sim_time: True
-
 waypoint_follower:
   ros__parameters:
-    loop_rate: 2000
+    loop_rate: 100
     stop_on_failure: false
     waypoint_task_executor_plugin: "wait_at_waypoint"   
     wait_at_waypoint:
       plugin: "nav2_waypoint_follower::WaitAtWaypoint"
       enabled: True
-      waypoint_pause_duration: 200
+      waypoint_pause_duration: 2000 
 
 # non implementato. 
 velocity_smoother:
