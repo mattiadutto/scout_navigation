@@ -174,7 +174,7 @@ def generate_launch_description():
     )
 
     nav2_amcl_node = Node(
-        namespace="/scout_mini",
+        namespace=namespace,
         package="nav2_amcl",
         executable="amcl",
         name="amcl",
@@ -186,7 +186,7 @@ def generate_launch_description():
         remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
 
-    nav2_behavior_server = Node(
+    nav2_behavior_server_node = Node(
         namespace=namespace,
         package="nav2_behaviors",
         executable="behavior_server",
@@ -199,22 +199,17 @@ def generate_launch_description():
         remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
 
-    nav2_velocity_smoother_node = Node(
+    nav2_smoother_server_node = Node(
         namespace=namespace,
-        package="nav2_velocity_smoother",
-        executable="velocity_smoother",
-        name="velocity_smoother",
+        package="nav2_smoother",
+        executable="smoother_server",
+        name="smoother_server",
         output="screen",
         respawn=False,
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[
-            ("/tf", "tf"),
-            ("/tf_static", "tf_static"),
-            ("cmd_vel", "cmd_vel_nav"),
-            ("cmd_vel_smoothed", "cmd_vel"),
-        ],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
 
     nav2_waypoint_follower_node = Node(
@@ -250,7 +245,7 @@ def generate_launch_description():
                     "planner_server",
                     "amcl",
                     "behavior_server",
-                    "velocity_smoother",
+                    "smoother_server",
                     "waypoint_follower",
                     "bt_navigator",
                 ]
@@ -271,10 +266,10 @@ def generate_launch_description():
     ld.add_action(nav2_map_server_node)
     ld.add_action(nav2_controller_node)
     ld.add_action(nav2_planner_node)
-    ld.add_action(nav2_behavior_server)
+    ld.add_action(nav2_behavior_server_node)
     ld.add_action(nav2_amcl_node)
+    ld.add_action(nav2_smoother_server_node)
     ld.add_action(nav2_waypoint_follower_node)
-    ld.add_action(nav2_velocity_smoother_node)
     ld.add_action(nav2_bt_node)
     ld.add_action(nav2_lifecycle_manager_node)
 
