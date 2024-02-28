@@ -1,10 +1,10 @@
 This package is a package for ROS2 Humble with the target of implementing Navigation Stack on the robot.
 Currently the navigation stack in a base configuration is working. 
 
-### TODO @ 26 / 01:
+### TODO @ 15 / 02:
 - [x] Set the correct parameter for all the "services" (amcl, costmaps ecc..) of Nav2
 - [ ] Create a BT that is able to switch between indoor and outdoor navigation
-- [ ] Implement the "Dead man's switch" using twist_mux: joypad and nav2
+- [x] Implement the "Dead man's switch" using twist_mux: joypad and nav2
 - [ ] Add controller
 - [ ] Add linearization
 - [ ] Add Model Predictive Control
@@ -15,7 +15,7 @@ Small staff:
 - [ ] Update the use guide
 
 ## How to use the stack
-If you don't have set up the Scout Mini per simulation you will need to download also this repositories.
+If you don't have set up the Scout Mini for simulation you will need to download also this repositories:
 ```bash
   git clone https://github.com/bascetta74/ugv_gazebo_sim.git
   git clone https://github.com/agilexrobotics/ugv_sdk.git

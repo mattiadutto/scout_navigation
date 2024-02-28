@@ -54,6 +54,11 @@ def generate_launch_description():
         convert_types=True,
     )
 
+    remapping = [
+        ("/tf", "tf"),
+        ("/tf_static", "tf_static"),
+    ]
+
     # Nodes
     rviz2_node = Node(
         namespace=namespace,
@@ -70,7 +75,7 @@ def generate_launch_description():
         ],
         parameters=[{"use_sim_time": use_sim_time}],
         output="screen",
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     robot_localization_local_node = Node(
@@ -80,9 +85,8 @@ def generate_launch_description():
         name="ekf_local_filter_node",
         output="screen",
         parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-        remappings=[
-            ("/tf", "tf"),
-            ("/tf_static", "tf_static"),
+        remappings=remapping
+        + [
             ("odometry/filtered", "odometry/filtered/local"),
         ],
     )
@@ -94,9 +98,8 @@ def generate_launch_description():
         name="ekf_global_filter_node",
         output="screen",
         parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-        remappings=[
-            ("/tf", "tf"),
-            ("/tf_static", "tf_static"),
+        remappings=remapping
+        + [
             ("odometry/filtered", "odometry/filtered/global"),
         ],
     )
@@ -108,11 +111,10 @@ def generate_launch_description():
         name="navsat_transform_node",
         output="screen",
         parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-        remappings=[
+        remappings=remapping
+        + [
             ("imu/data", "imu"),
             ("gps/fix", "gps"),
-            ("/tf", "tf"),
-            ("/tf_static", "tf_static"),
             ("odometry/filtered", "odometry/filtered/global"),
         ],
     )
@@ -127,7 +129,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     nav2_planner_node = Node(
@@ -140,7 +142,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     nav2_controller_node = Node(
@@ -153,9 +155,8 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[
-            ("/tf", "tf"),
-            ("/tf_static", "tf_static"),
+        remappings=remapping
+        + [
             ("/cmd_vel", "cmd_vel_nav"),
         ],
     )
@@ -183,7 +184,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     nav2_behavior_server_node = Node(
@@ -196,7 +197,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     nav2_smoother_server_node = Node(
@@ -209,7 +210,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     nav2_waypoint_follower_node = Node(
@@ -222,7 +223,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
         arguments=["--ros-args", "--log-level", "info"],
-        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
+        remappings=remapping,
     )
 
     nav2_lifecycle_manager_node = Node(
@@ -262,7 +263,7 @@ def generate_launch_description():
     # Add the commands to the launch description
     ld.add_action(robot_localization_local_node)
     ld.add_action(robot_localization_global_node)
-    # ld.add_action(navsat_transform_node) #TODO: questa linea e' commentata per evitare di attivare tutte le volte il servizio GPS.
+    # ld.add_action(navsat_transform_node)  # TODO: questa linea e' commentata per evitare di attivare tutte le volte il servizio GPS.
     ld.add_action(nav2_map_server_node)
     ld.add_action(nav2_controller_node)
     ld.add_action(nav2_planner_node)
