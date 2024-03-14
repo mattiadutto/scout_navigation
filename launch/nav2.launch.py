@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import launch 
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -40,7 +41,7 @@ def generate_launch_description():
 
     namespaced_nav2_params = ReplaceString(
         source_file=os.path.join(config_file_dir, "nav2_params.yaml"),
-        replacements={"/namespace": ("/", namespace)},
+        replacements={"/namespace": ("/", namespace)}, #TODO: set if you use namespace or not. 
     )
 
     namespaced_nav2_params = RewrittenYaml(
@@ -49,7 +50,8 @@ def generate_launch_description():
         param_rewrites={
             "yaml_filename": PathJoinSubstitution(
                 [get_package_share_directory(pkg_name), "maps", map_name]
-            )
+            ),
+            "use_sim_time": use_sim_time
         },
         convert_types=True,
     )
@@ -78,46 +80,46 @@ def generate_launch_description():
         remappings=remapping,
     )
 
-    robot_localization_local_node = Node(
-        namespace=namespace,
-        package="robot_localization",
-        executable="ekf_node",
-        name="ekf_local_filter_node",
-        output="screen",
-        parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-        remappings=remapping
-        + [
-            ("odometry/filtered", "odometry/filtered/local"),
-        ],
-    )
+    # robot_localization_local_node = Node(
+    #     namespace=namespace,
+    #     package="robot_localization",
+    #     executable="ekf_node",
+    #     name="ekf_local_filter_node",
+    #     output="screen",
+    #     parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
+    #     remappings=remapping
+    #     + [
+    #         ("odometry/filtered", "odometry/filtered/local"),
+    #     ],
+    # )
 
-    robot_localization_global_node = Node(
-        namespace=namespace,
-        package="robot_localization",
-        executable="ekf_node",
-        name="ekf_global_filter_node",
-        output="screen",
-        parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-        remappings=remapping
-        + [
-            ("odometry/filtered", "odometry/filtered/global"),
-        ],
-    )
+    # robot_localization_global_node = Node(
+    #     namespace=namespace,
+    #     package="robot_localization",
+    #     executable="ekf_node",
+    #     name="ekf_global_filter_node",
+    #     output="screen",
+    #     parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
+    #     remappings=remapping
+    #     + [
+    #         ("odometry/filtered", "odometry/filtered/global"),
+    #     ],
+    # )
 
-    navsat_transform_node = Node(
-        namespace=namespace,
-        package="robot_localization",
-        executable="navsat_transform_node",
-        name="navsat_transform_node",
-        output="screen",
-        parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-        remappings=remapping
-        + [
-            ("imu/data", "imu"),
-            ("gps/fix", "gps"),
-            ("odometry/filtered", "odometry/filtered/global"),
-        ],
-    )
+    # navsat_transform_node = Node(
+    #     namespace=namespace,
+    #     package="robot_localization",
+    #     executable="navsat_transform_node",
+    #     name="navsat_transform_node",
+    #     output="screen",
+    #     parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
+    #     remappings=remapping
+    #     + [
+    #         ("imu/data", "imu"),
+    #         ("gps/fix", "gps"),
+    #         ("odometry/filtered", "odometry/filtered/global"),
+    #     ],
+    # )
 
     nav2_bt_node = Node(
         namespace=namespace,
@@ -242,13 +244,13 @@ def generate_launch_description():
             {
                 "node_names": [
                     "map_server",
-                    "controller_server",
-                    "planner_server",
                     "amcl",
-                    "behavior_server",
+                    "controller_server",
                     "smoother_server",
-                    "waypoint_follower",
+                    "planner_server",
+                    "behavior_server",
                     "bt_navigator",
+                    "waypoint_follower",
                 ]
             },
         ],
@@ -261,17 +263,17 @@ def generate_launch_description():
     ld.add_action(declare_map_name_arg)
 
     # Add the commands to the launch description
-    ld.add_action(robot_localization_local_node)
-    ld.add_action(robot_localization_global_node)
+    # ld.add_action(robot_localization_local_node)
+    # ld.add_action(robot_localization_global_node)
     # ld.add_action(navsat_transform_node)  # TODO: questa linea e' commentata per evitare di attivare tutte le volte il servizio GPS.
     ld.add_action(nav2_map_server_node)
+    ld.add_action(nav2_amcl_node)
     ld.add_action(nav2_controller_node)
+    ld.add_action(nav2_smoother_server_node)
     ld.add_action(nav2_planner_node)
     ld.add_action(nav2_behavior_server_node)
-    ld.add_action(nav2_amcl_node)
-    ld.add_action(nav2_smoother_server_node)
-    ld.add_action(nav2_waypoint_follower_node)
     ld.add_action(nav2_bt_node)
+    ld.add_action(nav2_waypoint_follower_node)
     ld.add_action(nav2_lifecycle_manager_node)
 
     ld.add_action(rviz2_node)
