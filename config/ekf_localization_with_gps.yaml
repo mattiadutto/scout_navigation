@@ -25,11 +25,11 @@ namespace/ekf_global_filter_node:
         world_frame: map            # Defaults to the value of odom_frame if unspecified
         
         odom0: odom
-        odom0_config: [true,  true,  true,
-                       false, false, false,
-                       false, false, false,
-                       false, false, true,
-                       false, false, false]
+        odom0_config: [true,  true,  false, # X,    Y,      Z
+                       false, false, false, # roll, pitch,  yaw
+                       true,  false, false, # dX,   dY,     dZ
+                       false, false, true,  # droll,dpitch, dyaw
+                       false, false, false] # ddX,  ddY,    ddZ
 
         odom1: odometry/gps
         odom1_config: [true,  true,  false,
@@ -84,9 +84,9 @@ namespace/ekf_local_filter_node:
         world_frame: odom           # Defaults to the value of odom_frame if unspecified
         
         odom0: odom
-        odom0_config: [true,  true,  true,
+        odom0_config: [true,  true,  false,
                        false, false, false,
-                       false, false, false,
+                       true,  false, false,
                        false, false, true,
                        false, false, false]
 
@@ -102,17 +102,19 @@ namespace/ekf_local_filter_node:
 namespace/navsat_transform_node:
     ros__parameters:
         # The real-valued frequency, in Hz, at which navsat_transform_node checks for new sensor_msgs/NavSatFix messages, and publishes filtered sensor_msgs/NavSatFix when publish_filtered_gps is set to true.
-        frequency: 10.0
+        frequency: 1.0
 
         # Enter the magnetic declination for your location. If you don’t know it, see http://www.ngdc.noaa.gov/geomag-web (make sure to convert the value to radians). This parameter is needed if your IMU provides its orientation with respect to the magnetic north.
-        magnetic_declination_radians: 0.0625
+        magnetic_declination_radians: 0.02055
 
         # Your IMU should read 0 for yaw when facing east. If it doesn’t, enter the offset here (desired_value = offset + sensor_raw_value). For example, if your IMU reports 0 when facing north, as most of them do, this parameter would be pi/2 (~1.5707963). This parameter changed in version 2.2.1. Previously, navsat_transform_node assumed that IMUs read 0 when facing north, so yaw_offset was used acordingly.
         yaw_offset: 0.0
 
         # If true, navsat_transform_node will wait to get a datum from either: the datum parameter or the set_datum service
-        wait_for_datum: true
+        wait_for_datum: false
 
         # The time, in seconds, to wait before calculating the transform from GPS coordinates to your robot’s world frame.
         delay: 10.0
+
+        datum: [45.1467893, 10.0019068, 0.0] # TODO: update this position (now is on 'campetto del polo'), an alternative is to set wait_for_datum to true and comment this line, in this way the robot will compute the starting position autonomously. 
         
