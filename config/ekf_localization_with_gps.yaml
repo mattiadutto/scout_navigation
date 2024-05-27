@@ -118,3 +118,4 @@ namespace/navsat_transform_node:
 
         datum: [45.1467893, 10.0019068, 0.0] # TODO: update this position (now is on 'campetto del polo'), an alternative is to set wait_for_datum to true and comment this line, in this way the robot will compute the starting position autonomously. 
         
+        publish_filtered_gps: true

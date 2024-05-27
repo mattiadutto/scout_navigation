@@ -25,6 +25,8 @@ Panels:
         - /Controller1/VoxelGrid1
         - /Amcl Particle Swarm1
         - /Amcl Particle Swarm1/Topic1
+        - /Path1
+        - /MarkerArray1
       Splitter Ratio: 0.5
     Tree Height: 220
   - Class: rviz_common/Selection
@@ -100,25 +102,13 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
-          Value: true
         base_link:
           Value: true
         base_scan:
           Value: true
-        camera_depth_frame:
+        front_left_wheel_link:
           Value: true
-        camera_depth_optical_frame:
-          Value: true
-        camera_link:
-          Value: true
-        camera_rgb_frame:
-          Value: true
-        camera_rgb_optical_frame:
-          Value: true
-        caster_back_left_link:
-          Value: true
-        caster_back_right_link:
+        front_right_wheel_link:
           Value: true
         gps_link:
           Value: true
@@ -126,15 +116,13 @@ Visualization Manager:
           Value: true
         inertial_link:
           Value: true
-        laser:
-          Value: true
         map:
           Value: true
         odom:
           Value: true
-        wheel_left_link:
+        rear_left_wheel_link:
           Value: true
-        wheel_right_link:
+        rear_right_wheel_link:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -233,6 +221,12 @@ Visualization Manager:
             History Policy: Keep Last
             Reliability Policy: Reliable
             Value: /scout_mini/global_costmap/costmap
+          Update Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /scout_mini/global_costmap/costmap_updates
           Use Timestamp: false
           Value: true
         - Alpha: 0.30000001192092896
@@ -247,13 +241,13 @@ Visualization Manager:
             Filter size: 10
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /downsampled_costmap
+            Value: /scout_mini/downsampled_costmap
           Update Topic:
             Depth: 5
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /downsampled_costmap_updates
+            Value: /scout_mini/downsampled_costmap_updates
           Use Timestamp: false
           Value: false
         - Alpha: 1
@@ -282,7 +276,7 @@ Visualization Manager:
             Filter size: 10
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /plan
+            Value: /scout_mini/plan
           Value: true
         - Alpha: 1
           Autocompute Intensity Bounds: true
@@ -522,7 +516,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /initialpose
+        Value: /scout_mini/initialpose
     - Class: rviz_default_plugins/PublishPoint
       Single click: true
       Topic:

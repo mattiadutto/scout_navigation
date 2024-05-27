@@ -6,7 +6,7 @@ import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, LogInfo
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from nav2_common.launch import ReplaceString, RewrittenYaml
@@ -16,12 +16,12 @@ def generate_launch_description():
     # Specify the name of the package
     pkg_name = "scout_navigation"
     namespace = "scout_mini"
-
     config_file_dir = os.path.join(get_package_share_directory(pkg_name), "config")
 
     # Arguments and parameters
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
-    map_name = LaunchConfiguration("map_name", default="workshop_big_cartographer.yaml")
+    map_name = LaunchConfiguration("map_name", default="slam_farm.yaml")
+    namespace = LaunchConfiguration("namespace", default="scout_mini")
 
     declare_use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
@@ -33,6 +33,10 @@ def generate_launch_description():
         "map_name", default_value=map_name, description="Specify map name"
     )
 
+    declare_namespace_arg = DeclareLaunchArgument(
+        "namespace", default_value=namespace, description="Specify namespace of the robot"
+    )
+
     # Add namespace to robot_localization parameter files
     namespaced_ekf_localization_params = ReplaceString(
         source_file=os.path.join(config_file_dir, "ekf_localization_with_gps.yaml"),
@@ -41,7 +45,7 @@ def generate_launch_description():
 
     namespaced_nav2_params = ReplaceString(
         source_file=os.path.join(config_file_dir, "nav2_params.yaml"),
-        replacements={"/namespace": ("/", namespace)}, #TODO: set if you use namespace or not. 
+        replacements={"/namespace": ("/", namespace) if namespace != "" else ""}, #TODO: set if you use namespace or not. 
     )
 
     namespaced_nav2_params = RewrittenYaml(
@@ -261,6 +265,7 @@ def generate_launch_description():
     # Declare the launch options
     ld.add_action(declare_use_sim_time_arg)
     ld.add_action(declare_map_name_arg)
+    ld.add_action(declare_namespace_arg)
 
     # Add the commands to the launch description
     # ld.add_action(robot_localization_local_node)

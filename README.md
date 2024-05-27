@@ -36,5 +36,5 @@ Now we can activate the navgiation package.
 ```
 Last thing is to activate the teleop for control the system with the joypad
 ```bash
-  ros2 run teleop_twist_keyboard teleop_twist_keyboard cmd_vel:=/scout_mini/cmd_vel
+  ros2 run teleop_twist_keyboard teleop_twist_keyboard cmd_vel:=/scout_mini/cmd_vel_key
 ```
