@@ -90,6 +90,10 @@ def generate_launch_description():
         remappings=remapping
         + [
             ("odometry/filtered", "odometry/filtered/local"),
+<<<<<<< Updated upstream
+=======
+            ("imu", "/wit9073can_imu/data"),
+>>>>>>> Stashed changes
         ],
     )
 
@@ -103,6 +107,10 @@ def generate_launch_description():
         remappings=remapping
         + [
             ("odometry/filtered", "odometry/filtered/global"),
+<<<<<<< Updated upstream
+=======
+            ("imu", "/wit9073can_imu/data"),
+>>>>>>> Stashed changes
         ],
     )
 
@@ -115,9 +123,17 @@ def generate_launch_description():
         parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
         remappings=remapping
         + [
+<<<<<<< Updated upstream
             ("imu/data", "imu"),
             ("gps/fix", "fix"),
             ("odometry/filtered", "odometry/filtered/global"),
+=======
+            ("imu", "/wit9073can_imu/data"),
+            ("gps/fix", "/fix"),
+            #("gps/filtered", "/gps/filtered"),
+            #("odometry/gps", "/odometry/gps"),
+            ("odometry/filtered", "/odometry/filtered/global"),
+>>>>>>> Stashed changes
         ],
     )
 
