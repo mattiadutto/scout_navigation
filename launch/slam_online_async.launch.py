@@ -20,7 +20,7 @@ def generate_launch_description():
         description="Namespace of the robot for simulation usage."
     )
     
-    declare_use_sim_time_argument = DeclareLaunchArgument(
+    declare_use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time", 
         default_value="true", 
         description="Use simulation/Gazebo clock"
@@ -42,9 +42,9 @@ def generate_launch_description():
         name="slam_toolbox",
         output="screen",
         parameters=[slam_params_file_path, {"use_sim_time": use_sim_time}],
-        remappings=[("/scan", f"{namespace}/scan"),
-                    ("/tf", f"{namespace}/tf"), 
-                    ("/tf_static", f"{namespace}/tf_static")],
+        remappings=[("/scan", "/scout_mini/scan"),
+                    ("/tf", "/scout_mini/tf"), 
+                    ("/tf_static", "/scout_mini/tf_static")],
     )
 
     ld = LaunchDescription()
