@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import launch 
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, LogInfo
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from nav2_common.launch import ReplaceString, RewrittenYaml
 
@@ -15,13 +15,26 @@ from nav2_common.launch import ReplaceString, RewrittenYaml
 def generate_launch_description():
     # Specify the name of the package
     pkg_name = "scout_navigation"
-    namespace = "scout_mini"
+    namespace = ""
     config_file_dir = os.path.join(get_package_share_directory(pkg_name), "config")
 
     # Arguments and parameters
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
+    use_rviz = LaunchConfiguration("use_rviz", default="true")
     map_name = LaunchConfiguration("map_name", default="slam_farm.yaml")
-    namespace = LaunchConfiguration("namespace", default="scout_mini")
+    namespace = LaunchConfiguration("namespace", default="")
+
+    ekf_params_file = LaunchConfiguration(
+        "ekf_params_file", default="ekf_localization_with_gps.yaml"
+    )
+
+    nav2_params_file = LaunchConfiguration(
+        "nav2_params_file", default="nav2_params.yaml"
+    )
+
+    rviz_params_file = LaunchConfiguration(
+        "rviz_params_file", default="scout_mini_navigation.rviz"
+    )
 
     declare_use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
@@ -29,23 +42,49 @@ def generate_launch_description():
         description="Use simulation (Gazebo) clock if true",
     )
 
+    declare_user_rviz_arg = DeclareLaunchArgument(
+        "use_rviz", default_value=use_rviz, description="Run rviz if true"
+    )
+
     declare_map_name_arg = DeclareLaunchArgument(
         "map_name", default_value=map_name, description="Specify map name"
     )
 
     declare_namespace_arg = DeclareLaunchArgument(
-        "namespace", default_value=namespace, description="Specify namespace of the robot"
+        "namespace",
+        default_value=namespace,
+        description="Specify namespace of the robot",
+    )
+
+    declare_nav2_params_file = DeclareLaunchArgument(
+        "nav2_params_file",
+        default_value=nav2_params_file,
+        description="Specify the nav 2 configuration file",
+    )
+
+    declare_rviz_params_file = DeclareLaunchArgument(
+        "rviz_params_file",
+        default_value=rviz_params_file,
+        description="Specify the rviz 2 configuration file",
+    )
+
+    declare_ekf_params_file = DeclareLaunchArgument(
+        "ekf_params_file",
+        default_value=ekf_params_file,
+        description="Specify the ekf configuration file",
     )
 
     # Add namespace to robot_localization parameter files
     namespaced_ekf_localization_params = ReplaceString(
-        source_file=os.path.join(config_file_dir, "ekf_localization_with_gps.yaml"),
+        source_file=PathJoinSubstitution([config_file_dir, ekf_params_file]),
         replacements={"namespace": namespace},
     )
 
     namespaced_nav2_params = ReplaceString(
-        source_file=os.path.join(config_file_dir, "nav2_params.yaml"),
-        replacements={"/namespace": ("/", namespace) if namespace != "" else ""}, #TODO: set if you use namespace or not. 
+        source_file=PathJoinSubstitution([config_file_dir, nav2_params_file]),
+        replacements={
+            "/namespace": ("/", namespace) if namespace != "" else ""
+        },  # TODO: set if you use namespace or not.
     )
 
     namespaced_nav2_params = RewrittenYaml(
@@ -55,7 +94,7 @@ def generate_launch_description():
             "yaml_filename": PathJoinSubstitution(
                 [get_package_share_directory(pkg_name), "maps", map_name]
             ),
-            "use_sim_time": use_sim_time
+            "use_sim_time": use_sim_time,
         },
         convert_types=True,
     )
@@ -73,12 +112,11 @@ def generate_launch_description():
         name="rviz2",
         arguments=[
             "-d",
-            os.path.join(
-                get_package_share_directory(pkg_name),
-                "rviz",
-                "scout_mini_navigation.rviz",
+            PathJoinSubstitution(
+                [get_package_share_directory(pkg_name), "rviz", rviz_params_file]
             ),
         ],
+        condition=IfCondition(use_rviz),
         parameters=[{"use_sim_time": use_sim_time}],
         output="screen",
         remappings=remapping,
@@ -264,8 +302,12 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(declare_use_sim_time_arg)
+    ld.add_action(declare_user_rviz_arg)
     ld.add_action(declare_map_name_arg)
     ld.add_action(declare_namespace_arg)
+    ld.add_action(declare_ekf_params_file)
+    ld.add_action(declare_nav2_params_file)
+    ld.add_action(declare_rviz_params_file)
 
     # Add the commands to the launch description
     # ld.add_action(robot_localization_local_node)
