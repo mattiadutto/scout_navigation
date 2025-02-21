@@ -23,15 +23,12 @@ def generate_launch_description():
     use_rviz = LaunchConfiguration("use_rviz", default="true")
     map_name = LaunchConfiguration("map_name", default="slam_farm.yaml")
     namespace = LaunchConfiguration("namespace", default="")
-
     ekf_params_file = LaunchConfiguration(
         "ekf_params_file", default="ekf_localization_with_gps.yaml"
     )
-
     nav2_params_file = LaunchConfiguration(
         "nav2_params_file", default="nav2_params.yaml"
     )
-
     rviz_params_file = LaunchConfiguration(
         "rviz_params_file", default="scout_mini_navigation.rviz"
     )
@@ -122,18 +119,18 @@ def generate_launch_description():
         remappings=remapping,
     )
 
-    # robot_localization_local_node = Node(
-    #     namespace=namespace,
-    #     package="robot_localization",
-    #     executable="ekf_node",
-    #     name="ekf_local_filter_node",
-    #     output="screen",
-    #     parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
-    #     remappings=remapping
-    #     + [
-    #         ("odometry/filtered", "odometry/filtered/local"),
-    #     ],
-    # )
+    robot_localization_local_node = Node(
+        namespace=namespace,
+        package="robot_localization",
+        executable="ekf_node",
+        name="ekf_local_filter_node",
+        output="screen",
+        parameters=[namespaced_ekf_localization_params, {"use_sim_time": use_sim_time}],
+        remappings=remapping
+        + [
+            ("odometry/filtered", "odometry/filtered/local"),
+        ],
+    )
 
     # robot_localization_global_node = Node(
     #     namespace=namespace,
@@ -310,9 +307,9 @@ def generate_launch_description():
     ld.add_action(declare_rviz_params_file)
 
     # Add the commands to the launch description
-    # ld.add_action(robot_localization_local_node)
+    ld.add_action(robot_localization_local_node)
     # ld.add_action(robot_localization_global_node)
-    # ld.add_action(navsat_transform_node)  # TODO: questa linea e' commentata per evitare di attivare tutte le volte il servizio GPS.
+    # ld.add_action(navsat_transform_node)  # TODO: this line is commented for avoid to startup each time the GPS in simulation.
     ld.add_action(nav2_map_server_node)
     ld.add_action(nav2_amcl_node)
     ld.add_action(nav2_controller_node)
