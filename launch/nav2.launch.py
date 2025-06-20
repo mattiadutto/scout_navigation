@@ -80,17 +80,17 @@ def generate_launch_description():
     namespaced_nav2_params = ReplaceString(
         source_file=PathJoinSubstitution([config_file_dir, nav2_params_file]),
         replacements={
-            "/namespace": ("/", namespace) if namespace != "" else ""
-        },  # TODO: set if you use namespace or not.
+            "/namespace": ("/", namespace) if namespace != "" else "",
+            "navigation_map": PathJoinSubstitution(
+                [get_package_share_directory(pkg_name), "maps", map_name]
+            ),
+        },
     )
 
     namespaced_nav2_params = RewrittenYaml(
         source_file=namespaced_nav2_params,
         root_key=namespace,
         param_rewrites={
-            "yaml_filename": PathJoinSubstitution(
-                [get_package_share_directory(pkg_name), "maps", map_name]
-            ),
             "use_sim_time": use_sim_time,
         },
         convert_types=True,
@@ -254,19 +254,6 @@ def generate_launch_description():
         remappings=remapping,
     )
 
-    nav2_waypoint_follower_node = Node(
-        namespace=namespace,
-        package="nav2_waypoint_follower",
-        executable="waypoint_follower",
-        name="waypoint_follower",
-        output="screen",
-        respawn=False,
-        respawn_delay=2.0,
-        parameters=[namespaced_nav2_params, {"use_sim_time": use_sim_time}],
-        arguments=["--ros-args", "--log-level", "info"],
-        remappings=remapping,
-    )
-
     nav2_lifecycle_manager_node = Node(
         namespace=namespace,
         package="nav2_lifecycle_manager",
@@ -289,7 +276,6 @@ def generate_launch_description():
                     "planner_server",
                     "behavior_server",
                     "bt_navigator",
-                    "waypoint_follower",
                 ]
             },
         ],
@@ -317,7 +303,6 @@ def generate_launch_description():
     ld.add_action(nav2_planner_node)
     ld.add_action(nav2_behavior_server_node)
     ld.add_action(nav2_bt_node)
-    ld.add_action(nav2_waypoint_follower_node)
     ld.add_action(nav2_lifecycle_manager_node)
 
     ld.add_action(rviz2_node)
